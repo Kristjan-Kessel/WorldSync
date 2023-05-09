@@ -33,6 +33,11 @@ public class Syncer {
         //time loop
         loops[0] = Bukkit.getScheduler().runTaskTimer(main, ()->{
             result = weatherAPI.getWeather(syncTarget);
+            //check if result was valid
+            if(result==null){
+                cancelLoop();
+                return;
+            }
             world.setTime(convertPercentageToTimeTicks(calculateDaylightCycleRatio()));
         },0,timeUpdateFrequency);
 

@@ -1,5 +1,7 @@
 package me.jann.worldsync;
 
+import me.jann.worldsync.commands.SyncCommand;
+import me.jann.worldsync.commands.SyncTab;
 import me.jann.worldsync.weather.WeatherAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -10,6 +12,7 @@ import java.util.logging.Logger;
 
 public final class WorldSync extends JavaPlugin {
 
+    public static final String ADMIN_PERMISSION = "worldsync.admin";
     HashMap<String,Syncer> syncers = new HashMap<>();
     private String API_KEY;
     public WeatherAPI weatherAPI;
@@ -20,28 +23,31 @@ public final class WorldSync extends JavaPlugin {
 
         log = getLogger();
 
+        getCommand("worldsync").setExecutor(new SyncCommand(this));
+        getCommand("worldsync").setTabCompleter(new SyncTab());
+
         this.getConfig().options().copyDefaults();
         this.saveDefaultConfig();
 
         loadFromConfig();
     }
 
-    private void loadFromConfig(){
-        API_KEY = this.getConfig().getString("api-key");
-
-        if(!WeatherAPI.isApiKeyValid(API_KEY)) {
-            log.warning("The provided OpenWeatherMap API key is invalid. The plugin will now disable itself. Please check that the key is correct and try again.");
-            // Disable the plugin
-            Bukkit.getPluginManager().disablePlugin(this);
-        }
-
-        weatherAPI = new WeatherAPI(API_KEY);
+    public void loadFromConfig(){
 
         //clear old syncers
         for(Syncer syncer:syncers.values()){
             syncer.cancelLoop();
         }
         syncers.clear();
+
+        API_KEY = this.getConfig().getString("api-key");
+
+        if(!WeatherAPI.isApiKeyValid(API_KEY)) {
+            log.warning("The provided OpenWeatherMap API key is invalid. Check your config.yml and try again with '/worldsync reload'");
+            return;
+        }
+
+        weatherAPI = new WeatherAPI(API_KEY);
 
         //load new syncers
         for(String worldName : getConfig().getConfigurationSection("worlds").getKeys(false)){

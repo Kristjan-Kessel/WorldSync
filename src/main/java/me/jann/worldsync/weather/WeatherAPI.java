@@ -1,7 +1,8 @@
 package me.jann.worldsync.weather;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -44,14 +45,16 @@ public class WeatherAPI {
             scanner.close();
 
             // Parse the JSON response to retrieve the sunrise and sunset times
-            JSONObject jsonObject = new JSONObject(inline.toString());
-            JSONObject sysObject = jsonObject.getJSONObject("sys");
-            long timezoneOffset = jsonObject.getLong("timezone");
-            long sunriseLong = sysObject.getLong("sunrise")-timezoneOffset;
-            long sunsetLong = sysObject.getLong("sunset")-timezoneOffset;
+            // use gson here instead of json
 
-            JSONArray weatherArray = jsonObject.getJSONArray("weather");
-            String weatherCondition = weatherArray.getJSONObject(0).getString("main");
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(inline.toString(), JsonObject.class);
+            JsonObject sysObject = jsonObject.getAsJsonObject("sys");
+            long timezoneOffset = jsonObject.get("timezone").getAsLong();
+            long sunriseLong = sysObject.get("sunrise").getAsLong() - timezoneOffset;
+            long sunsetLong = sysObject.get("sunset").getAsLong() - timezoneOffset;
+            JsonArray weatherArray = jsonObject.getAsJsonArray("weather");
+            String weatherCondition = weatherArray.get(0).getAsJsonObject().get("main").getAsString();
 
             Date sunsetDate = new Date(sunsetLong * 1000);
             Date sunriseDate = new Date(sunriseLong * 1000);

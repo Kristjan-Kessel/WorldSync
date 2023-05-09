@@ -2,3 +2,9 @@ name: WorldSync
 version: '${project.version}'
 main: me.jann.worldsync.WorldSync
 api-version: 1.19
+commands:
+  worldsync:
+    description: WorldSync command
+    usage: /<command> [reload]
+    aliases: [ws]
+    permission: worldsync.admin
