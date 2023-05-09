@@ -12,7 +12,6 @@ public class Syncer {
     private static final int timeUpdateFrequency = 20;
     private static final int weatherUpdateFrequency = 20*60*15;
     private final WorldSync main;
-
     private final WeatherAPI weatherAPI;
     private final World world;
     private final String syncTarget;
@@ -65,6 +64,7 @@ public class Syncer {
 
     public static long convertPercentageToTimeTicks(double percentage){
         if(percentage<0){
+            percentage*=-1;
             //night 12000-0
             return (long) (12000*(1+percentage));
         }else{
@@ -85,13 +85,14 @@ public class Syncer {
 
 
         if(current.after(sunrise) && current.before(sunset)){
+            //day
             currentEpoch-=sunriseEpoch;
             sunsetEpoch-=sunriseEpoch;
             return currentEpoch*1.0/sunsetEpoch;
         }
 
         if(current.before(sunrise)){
-
+            //night
             if(current.before(sunset)) {
                 sunsetEpoch -= 86400;
             }
@@ -101,6 +102,15 @@ public class Syncer {
             return currentEpoch*-1.0/sunriseEpoch;
         }
 
+        if (current.after(sunset) && current.after(sunrise)){
+            //night
+            sunriseEpoch+=86400;
+            currentEpoch-=sunsetEpoch;
+            sunriseEpoch-=sunsetEpoch;
+            return currentEpoch*-1.0/sunriseEpoch;
+        }
+
+        main.log.warning("Somethings gone horribly wrong!");
         return -1;
     }
 

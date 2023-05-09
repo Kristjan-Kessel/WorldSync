@@ -3,6 +3,8 @@ package me.jann.worldsync.weather;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.bukkit.Bukkit;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,7 +33,6 @@ public class WeatherAPI {
             int responseCode = conn.getResponseCode();
 
             if (responseCode != 200) {
-                System.out.println("Error: " + responseCode);
                 return null;
             }
 
@@ -61,7 +62,6 @@ public class WeatherAPI {
 
             return new WeatherResult(sunriseDate,sunsetDate,weatherCondition, timezoneOffset);
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -78,7 +78,6 @@ public class WeatherAPI {
 
             return responseCode == 200;
         } catch (IOException e) {
-            e.printStackTrace();
             return false;
         }
     }
