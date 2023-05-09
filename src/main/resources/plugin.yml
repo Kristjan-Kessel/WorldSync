@@ -1,0 +1,4 @@
+name: WorldSync
+version: '${project.version}'
+main: me.jann.worldsync.WorldSync
+api-version: 1.19
