@@ -16,21 +16,16 @@ import java.util.concurrent.TimeUnit;
 public class WeatherResult {
 
     public final String weatherCondition;
-    public final LocalTime sunrise;
-    public final LocalTime sunset;
+    public final Date sunriseDate;
+    public final Date sunsetDate;
     public final Long timeZoneOffset;
 
-    public WeatherResult(LocalTime sunrise, LocalTime sunset, String weatherCondition, long timeZoneOffset) {
+    public WeatherResult(Date sunriseDate, Date sunsetDate, String weatherCondition, long timeZoneOffset) {
         this.weatherCondition = weatherCondition;
-        this.sunrise = sunrise;
-        this.sunset = sunset;
+        this.sunriseDate = sunriseDate;
+        this.sunsetDate = sunsetDate;
         this.timeZoneOffset = timeZoneOffset;
     }
 
-    public LocalTime getCurrentTime(){
-        LocalTime time = LocalTime.now(ZoneId.of("UTC"));
-        time = time.plus(timeZoneOffset, ChronoUnit.SECONDS);
-        return time;
-    }
 
 }

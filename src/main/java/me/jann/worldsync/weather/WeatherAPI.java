@@ -10,6 +10,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -51,22 +52,17 @@ public class WeatherAPI {
             // Parse the JSON response to retrieve the sunrise and sunset times
             JSONObject jsonObject = new JSONObject(inline.toString());
             JSONObject sysObject = jsonObject.getJSONObject("sys");
-            long sunriseTime = sysObject.getLong("sunrise");
-            long sunsetTime = sysObject.getLong("sunset");
+            long timezoneOffset = jsonObject.getLong("timezone");
+            long sunriseLong = sysObject.getLong("sunrise")-timezoneOffset;
+            long sunsetLong = sysObject.getLong("sunset")-timezoneOffset;
 
             JSONArray weatherArray = jsonObject.getJSONArray("weather");
             String weatherCondition = weatherArray.getJSONObject(0).getString("main");
 
-            long timezoneOffset = jsonObject.getLong("timezone");
+            Date sunsetDate = new Date(sunsetLong * 1000);
+            Date sunriseDate = new Date(sunriseLong * 1000);
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-            String sunriseTimeString = dateFormat.format(new Date(sunriseTime * 1000));
-            String sunsetTimeString = dateFormat.format(new Date(sunsetTime * 1000));
-
-            LocalTime sunrise = LocalTime.parse(sunriseTimeString);
-            LocalTime sunset = LocalTime.parse(sunsetTimeString);
-
-            return new WeatherResult(sunrise,sunset,weatherCondition, timezoneOffset);
+            return new WeatherResult(sunriseDate,sunsetDate,weatherCondition, timezoneOffset);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
