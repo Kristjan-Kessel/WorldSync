@@ -1,5 +1,6 @@
 package me.jann.worldsync;
 
+import me.jann.worldsync.weather.WeatherAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

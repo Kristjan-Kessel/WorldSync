@@ -1,5 +1,6 @@
-package me.jann.worldsync;
+package me.jann.worldsync.weather;
 
+import me.jann.worldsync.weather.WeatherResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -7,8 +8,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 public class WeatherAPI {
 
@@ -19,7 +23,7 @@ public class WeatherAPI {
         this.API_KEY = apiKey;
     }
 
-    public void getWeather(String location){
+    public WeatherResult getWeather(String location){
 
         try {
             URL url = new URL("https://api.openweathermap.org/data/2.5/weather?q=" + location + "&appid=" + API_KEY);
@@ -32,42 +36,40 @@ public class WeatherAPI {
 
             if (responseCode != 200) {
                 System.out.println("Error: " + responseCode);
-                return;
+                return null;
             }
 
-            String inline = "";
+            StringBuilder inline = new StringBuilder();
             Scanner scanner = new Scanner(url.openStream());
 
             while (scanner.hasNext()) {
-                inline += scanner.nextLine();
+                inline.append(scanner.nextLine());
             }
 
             scanner.close();
 
             // Parse the JSON response to retrieve the sunrise and sunset times
-            JSONObject jsonObject = new JSONObject(inline);
+            JSONObject jsonObject = new JSONObject(inline.toString());
             JSONObject sysObject = jsonObject.getJSONObject("sys");
             long sunriseTime = sysObject.getLong("sunrise");
             long sunsetTime = sysObject.getLong("sunset");
+
             JSONArray weatherArray = jsonObject.getJSONArray("weather");
             String weatherCondition = weatherArray.getJSONObject(0).getString("main");
 
-            // Format the sunrise and sunset times as strings in the "HH:mm" format
+            long timezoneOffset = jsonObject.getLong("timezone");
+
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
             String sunriseTimeString = dateFormat.format(new Date(sunriseTime * 1000));
             String sunsetTimeString = dateFormat.format(new Date(sunsetTime * 1000));
 
-            // Calculate the amount of time between sunrise and sunset
-            long timeDifference = sunsetTime - sunriseTime;
+            LocalTime sunrise = LocalTime.parse(sunriseTimeString);
+            LocalTime sunset = LocalTime.parse(sunsetTimeString);
 
-            // Print the sunrise and sunset times and the time difference between them
-            System.out.println("Sunrise time: " + sunriseTimeString);
-            System.out.println("Sunset time: " + sunsetTimeString);
-            System.out.println("Time between sunrise and sunset: " + (timeDifference / 3600) + " hours " + ((timeDifference % 3600) / 60) + " minutes");
-
-            System.out.println("Weather condition: " + weatherCondition);
+            return new WeatherResult(sunrise,sunset,weatherCondition, timezoneOffset);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
@@ -81,11 +83,7 @@ public class WeatherAPI {
 
             int responseCode = conn.getResponseCode();
 
-            if (responseCode != 200) {
-                return false;
-            } else {
-                return true;
-            }
+            return responseCode == 200;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
