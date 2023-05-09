@@ -1,19 +1,13 @@
 package me.jann.worldsync.weather;
 
-import me.jann.worldsync.weather.WeatherResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Scanner;
-import java.util.TimeZone;
+
 
 public class WeatherAPI {
 

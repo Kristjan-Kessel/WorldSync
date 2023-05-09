@@ -2,38 +2,63 @@ package me.jann.worldsync;
 
 import me.jann.worldsync.weather.WeatherAPI;
 import me.jann.worldsync.weather.WeatherResult;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 public class Syncer {
+    private static final int timeUpdateFrequency = 20;
+    private static final int weatherUpdateFrequency = 20*60*15;
+    private final WorldSync main;
+
     private final WeatherAPI weatherAPI;
     private final World world;
     private final String syncTarget;
-    private WeatherResult result;
+    public WeatherResult result;
 
-    public Syncer(WeatherAPI weatherAPI, World world, String syncTarget) {
+    private final BukkitTask[] loops = new BukkitTask[2];
+
+    public Syncer(WeatherAPI weatherAPI, World world, String syncTarget, WorldSync main) {
         this.weatherAPI = weatherAPI;
         this.world = world;
         this.syncTarget = syncTarget;
-
+        this.main = main;
         result = weatherAPI.getWeather(syncTarget);
     }
 
-    /*
-    Mc day lasts 0-24000 ticks
-    0 is sunrise
-    6000 is noon
-    12000 is sunset
-    18000 is midnight
-     */
+    public void startLoop(){
 
-    public static long convertToTimeTicks(double percentage){
+        //time loop
+        loops[0] = Bukkit.getScheduler().runTaskTimer(main, ()->{
+            result = weatherAPI.getWeather(syncTarget);
+            world.setTime(convertPercentageToTimeTicks(calculateDaylightCycleRatio()));
+        },0,timeUpdateFrequency);
+
+        //weather loop
+        loops[1] = Bukkit.getScheduler().runTaskTimer(main, this::setWeatherFromResult,0,weatherUpdateFrequency);
+    }
+
+    public void cancelLoop(){
+        for (BukkitTask loop : loops) {
+            loop.cancel();
+        }
+    }
+
+    public void setWeatherFromResult(){
+        if(result.weatherCondition.contains("thunder")){
+            world.setThundering(true);
+            world.setThunderDuration(weatherUpdateFrequency);
+        }else if(result.weatherCondition.contains("rain")){
+            world.setStorm(true);
+            world.setWeatherDuration(weatherUpdateFrequency);
+        }else{
+            world.setClearWeatherDuration(weatherUpdateFrequency);
+        }
+    }
+
+    public static long convertPercentageToTimeTicks(double percentage){
         if(percentage<0){
             //night 12000-0
             return (long) (12000*(1+percentage));
@@ -43,7 +68,7 @@ public class Syncer {
         }
     }
 
-    double calculate() {
+    double calculateDaylightCycleRatio() {
         //current date in gmt
         Date current = new Date(new Date().getTime() - result.timeZoneOffset * 1000);
         Date sunrise = result.sunriseDate;

@@ -1,17 +1,7 @@
 package me.jann.worldsync.weather;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalField;
-import java.time.temporal.TemporalUnit;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
+
 
 public class WeatherResult {
 
