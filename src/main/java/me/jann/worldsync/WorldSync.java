@@ -27,6 +27,10 @@ public final class WorldSync extends JavaPlugin {
     public Logger log;
     public boolean sleepRegenEnabled;
 
+    public int timeUpdateFrequency;
+    public int weatherUpdateFrequency;
+    public int apiRefreshFrequency = 20*60*60*24;
+
     @Override
     public void onEnable() {
 
@@ -51,9 +55,11 @@ public final class WorldSync extends JavaPlugin {
         }
         syncers.clear();
 
-        API_KEY = this.getConfig().getString("api-key");
+        API_KEY = getConfig().getString("api-key");
+        timeUpdateFrequency = getConfig().getInt("time-update-frequency",600)*20;
+        weatherUpdateFrequency = getConfig().getInt("weather-update-frequency",5)*20;
 
-        sleepRegenEnabled = this.getConfig().getBoolean("sleep-regen");
+        sleepRegenEnabled = getConfig().getBoolean("sleep-regen");
 
         if(!WeatherAPI.isApiKeyValid(API_KEY)) {
 
@@ -62,7 +68,6 @@ public final class WorldSync extends JavaPlugin {
             }
 
             log.warning("The provided OpenWeatherMap API key is invalid. Check the config.yml and try again with '/worldsync reload'");
-
 
             return;
         }

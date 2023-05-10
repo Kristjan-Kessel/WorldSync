@@ -22,8 +22,9 @@ public class SyncTab implements TabCompleter {
         if(args.length == 1){
             completions.add("reload");
             completions.add("sync");
+            completions.add("info");
         }else if(args.length == 2){
-            if(args[0].equalsIgnoreCase("sync")){
+            if(args[0].equalsIgnoreCase("sync") || args[0].equalsIgnoreCase("info")){
                 for (World world: Bukkit.getWorlds()){
                     completions.add(world.getName());
                 }

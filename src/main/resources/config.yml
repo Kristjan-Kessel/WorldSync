@@ -1,4 +1,15 @@
+#API key for the weather service. Sign up at https://openweathermap.org/api to get one for free.
 api-key: ""
+
+#if players get regeneration while sleeping in a bed
 sleep-regen: true
+
+#how often to update the weather in seconds
+weather-update-frequency: 600
+
+#how often to update the time in seconds
+time-update-frequency: 2
+
+#list of worlds to sync
 worlds:
   world: "Tallinn"

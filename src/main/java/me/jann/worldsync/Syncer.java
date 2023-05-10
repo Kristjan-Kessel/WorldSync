@@ -11,8 +11,6 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 public class Syncer {
-    private static final int timeUpdateFrequency = 20;
-    private static final int weatherUpdateFrequency = 20*60*15;
     private final WorldSync main;
     private final WeatherAPI weatherAPI;
     private final World world;
@@ -40,11 +38,12 @@ public class Syncer {
                 return;
             }
             world.setTime(convertPercentageToTimeTicks(calculateDaylightCycleRatio()));
-        },0,timeUpdateFrequency);
+        },0,main.timeUpdateFrequency);
 
         //weather loop
-        loops[1] = Bukkit.getScheduler().runTaskTimer(main, this::setWeatherFromResult,0,weatherUpdateFrequency);
+        loops[1] = Bukkit.getScheduler().runTaskTimer(main, this::setWeatherFromResult,0,main.weatherUpdateFrequency);
     }
+
 
     public void cancelLoop(){
         for (BukkitTask loop : loops) {
@@ -55,12 +54,12 @@ public class Syncer {
     public void setWeatherFromResult(){
         if(result.weatherCondition.contains("thunder")){
             world.setThundering(true);
-            world.setThunderDuration(weatherUpdateFrequency);
+            world.setThunderDuration(main.weatherUpdateFrequency+5);
         }else if(result.weatherCondition.contains("rain")){
             world.setStorm(true);
-            world.setWeatherDuration(weatherUpdateFrequency);
+            world.setWeatherDuration(main.weatherUpdateFrequency+5);
         }else{
-            world.setClearWeatherDuration(weatherUpdateFrequency);
+            world.setClearWeatherDuration(main.weatherUpdateFrequency+5);
         }
     }
 
@@ -91,7 +90,7 @@ public class Syncer {
             currentEpoch-=sunriseEpoch;
             sunsetEpoch-=sunriseEpoch;
             return currentEpoch*1.0/sunsetEpoch;
-        }
+        } else
 
         if(current.isBefore(sunrise)){
             //night
@@ -102,9 +101,17 @@ public class Syncer {
             currentEpoch-=sunsetEpoch;
             sunriseEpoch-=sunsetEpoch;
             return currentEpoch*-1.0/sunriseEpoch;
-        }
+        } else
 
         if (current.isBefore(sunset) && current.isBefore(sunrise)){
+            //night
+            sunriseEpoch+=86400;
+            currentEpoch-=sunsetEpoch;
+            sunriseEpoch-=sunsetEpoch;
+            return currentEpoch*-1.0/sunriseEpoch;
+        } else
+
+        if (current.isAfter(sunset) && sunset.isAfter(sunrise)){
             //night
             sunriseEpoch+=86400;
             currentEpoch-=sunsetEpoch;
@@ -113,6 +120,7 @@ public class Syncer {
         }
 
         main.log.warning("Somethings gone horribly wrong!");
+        cancelLoop();
         return -1;
     }
 

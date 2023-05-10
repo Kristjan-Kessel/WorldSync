@@ -9,6 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 import static me.jann.worldsync.WorldSync.colorCode;
@@ -71,7 +73,7 @@ public class SyncCommand implements CommandExecutor {
                         sender.sendMessage(colorCode("&7World: &f"+worldName));
                         sender.sendMessage(colorCode("&7Sunrise: &f"+result.sunriseDate));
                         sender.sendMessage(colorCode("&7Sunset: &f"+result.sunsetDate));
-                        sender.sendMessage(colorCode("&7Current: &f"+new Date(new Date().getTime() - result.timeZoneOffset * 1000)));
+                        sender.sendMessage(colorCode("&7Current: &f"+ LocalDateTime.now(ZoneOffset.UTC)));
                         sender.sendMessage(colorCode("&7Weather: &f"+result.weatherCondition));
 
                         return true;
