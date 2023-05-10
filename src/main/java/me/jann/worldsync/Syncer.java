@@ -74,8 +74,9 @@ public class Syncer {
     }
 
     double calculateDaylightCycleRatio() {
-        //current date in gmt
+
         Date current = new Date(new Date().getTime() - result.timeZoneOffset * 1000);
+
         Date sunrise = result.sunriseDate;
         Date sunset = result.sunsetDate;
 

@@ -24,11 +24,7 @@ public class SleepEvent implements Listener {
 
         Player p = e.getPlayer();
 
-        p.sendMessage("got here");
-
         if(!main.syncers.containsKey(p.getLocation().getWorld().getName())) return;
-
-        p.sendMessage("got here");
 
         BukkitTask[] tasks = new BukkitTask[1];
 

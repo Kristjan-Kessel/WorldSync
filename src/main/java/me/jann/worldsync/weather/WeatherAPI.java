@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -45,9 +47,6 @@ public class WeatherAPI {
 
             scanner.close();
 
-            // Parse the JSON response to retrieve the sunrise and sunset times
-            // use gson here instead of json
-
             Gson gson = new Gson();
             JsonObject jsonObject = gson.fromJson(inline.toString(), JsonObject.class);
             JsonObject sysObject = jsonObject.getAsJsonObject("sys");
@@ -57,7 +56,9 @@ public class WeatherAPI {
             JsonArray weatherArray = jsonObject.getAsJsonArray("weather");
             String weatherCondition = weatherArray.get(0).getAsJsonObject().get("main").getAsString();
 
+            //UTC
             Date sunsetDate = new Date(sunsetLong * 1000);
+            //UTC
             Date sunriseDate = new Date(sunriseLong * 1000);
 
             return new WeatherResult(sunriseDate,sunsetDate,weatherCondition, timezoneOffset);
