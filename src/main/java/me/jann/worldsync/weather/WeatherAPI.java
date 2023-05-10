@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -51,17 +52,23 @@ public class WeatherAPI {
             JsonObject jsonObject = gson.fromJson(inline.toString(), JsonObject.class);
             JsonObject sysObject = jsonObject.getAsJsonObject("sys");
             long timezoneOffset = jsonObject.get("timezone").getAsLong();
-            long sunriseLong = sysObject.get("sunrise").getAsLong() - timezoneOffset;
-            long sunsetLong = sysObject.get("sunset").getAsLong() - timezoneOffset;
+            long sunriseLong = sysObject.get("sunrise").getAsLong();
+            long sunsetLong = sysObject.get("sunset").getAsLong();
+
             JsonArray weatherArray = jsonObject.getAsJsonArray("weather");
             String weatherCondition = weatherArray.get(0).getAsJsonObject().get("main").getAsString();
 
-            //UTC
+            //sunriseLong -= timezoneOffset;
+            //sunsetLong -= timezoneOffset;
+
             Date sunsetDate = new Date(sunsetLong * 1000);
-            //UTC
             Date sunriseDate = new Date(sunriseLong * 1000);
 
-            return new WeatherResult(sunriseDate,sunsetDate,weatherCondition, timezoneOffset);
+            //make them UTC so they can be compared to the current time
+            LocalDateTime sunsetUTC = LocalDateTime.ofInstant(Instant.ofEpochSecond(sunsetLong), ZoneOffset.UTC);
+            LocalDateTime sunriseUTC = LocalDateTime.ofInstant(Instant.ofEpochSecond(sunriseLong), ZoneOffset.UTC);
+
+            return new WeatherResult(sunriseUTC,sunsetUTC,weatherCondition, timezoneOffset);
         } catch (IOException e) {
             return null;
         }

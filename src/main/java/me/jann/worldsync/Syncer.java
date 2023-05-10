@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 public class Syncer {
@@ -75,26 +77,25 @@ public class Syncer {
 
     double calculateDaylightCycleRatio() {
 
-        Date current = new Date(new Date().getTime() - result.timeZoneOffset * 1000);
+        LocalDateTime current = LocalDateTime.now(ZoneOffset.UTC);
 
-        Date sunrise = result.sunriseDate;
-        Date sunset = result.sunsetDate;
+        LocalDateTime sunrise = result.sunriseDate;
+        LocalDateTime sunset = result.sunsetDate;
 
-        long currentEpoch = current.toInstant().getEpochSecond();
-        long sunriseEpoch = sunrise.toInstant().getEpochSecond();
-        long sunsetEpoch = sunset.toInstant().getEpochSecond();
+        long currentEpoch = current.toInstant(ZoneOffset.UTC).getEpochSecond();
+        long sunriseEpoch = sunrise.toInstant(ZoneOffset.UTC).getEpochSecond();
+        long sunsetEpoch = sunset.toInstant(ZoneOffset.UTC).getEpochSecond();
 
-
-        if(current.after(sunrise) && current.before(sunset)){
+        if(current.isAfter(sunrise) && current.isBefore(sunset)){
             //day
             currentEpoch-=sunriseEpoch;
             sunsetEpoch-=sunriseEpoch;
             return currentEpoch*1.0/sunsetEpoch;
         }
 
-        if(current.before(sunrise)){
+        if(current.isBefore(sunrise)){
             //night
-            if(current.before(sunset)) {
+            if(current.isBefore(sunset)) {
                 sunsetEpoch -= 86400;
             }
 
@@ -103,7 +104,7 @@ public class Syncer {
             return currentEpoch*-1.0/sunriseEpoch;
         }
 
-        if (current.after(sunset) && current.after(sunrise)){
+        if (current.isBefore(sunset) && current.isBefore(sunrise)){
             //night
             sunriseEpoch+=86400;
             currentEpoch-=sunsetEpoch;
